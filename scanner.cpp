@@ -4,8 +4,7 @@
 
 #include "scanner.h"
 
-lexem scanner::read_lexem()
-{
+lexem scanner::read_lexem() {
     _token.clear();
 
     while(skip(' '))
@@ -110,8 +109,7 @@ lexem scanner::read_lexem()
     throw new std::runtime_error("Unknown token '" + _token + "'.");
 }
 
-bool scanner::skip(char c)
-{
+bool scanner::skip(char c) {
     if(_input.peek() == c) {
         _input.get();
 
@@ -121,8 +119,7 @@ bool scanner::skip(char c)
     return false;
 }
 
-bool scanner::take(char c)
-{
+bool scanner::take(char c) {
     if(_input.peek() == c) {
         _token += _input.get();
 
@@ -132,8 +129,7 @@ bool scanner::take(char c)
     return false;
 }
 
-bool scanner::take(int (*function)(int))
-{
+bool scanner::take(int (*function)(int)) {
     if(function(_input.peek())) {
         _token += _input.get();
 

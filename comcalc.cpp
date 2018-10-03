@@ -14,8 +14,7 @@
 #define PATH_SEPARATOR '/'
 #endif
 
-void compile(const std::string& infile, const std::string& outfile)
-{
+void compile(const std::string& infile, const std::string& outfile) {
     std::ifstream in;
     in.open(infile);
     try {
@@ -50,8 +49,7 @@ std::string replace_extension(const std::string& filename, const std::string& ex
     return filename.substr(0, point_position) + extension;
 }
 
-int main(int argc, const char* const* argv)
-{
+int main(int argc, const char* const* argv) {
     std::cout << "COMpiled CALCulator" << std::endl;
 
     if(argc < 2 || argc > 3) {

@@ -30,6 +30,12 @@
     <ClInclude Include="llvm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pregenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="generator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="comcalc.cpp">
@@ -42,6 +48,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="scanner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="llvm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -5,8 +5,6 @@
 
 #include "ast.h"
 
-void generate(const ast_program* program, std::ostream& out)
-{
-}
+void generate(const ast_program* program, std::ostream& out);
 
 #endif

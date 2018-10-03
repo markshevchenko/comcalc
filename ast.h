@@ -2,6 +2,7 @@
 #define __AST_H__
 
 #include <string>
+#include <set>
 #include <vector>
 
 class ast_program;
@@ -304,7 +305,7 @@ public:
         visitor.visit_call(this);
     }
 
-    const std::vector<const ast_expression*> parameters() const {
+    const std::vector<const ast_expression*> &parameters() const {
         return _parameters;
     }
 };
@@ -350,11 +351,11 @@ class ast_function : public ast
 {
 private:
     std::string _name;
-    std::vector<std::string> _parameters;
+    std::set<std::string> _parameters;
     const ast_expression* _expression;
 
 public:
-    ast_function(const std::string& name, const std::vector<std::string>& parameters, const ast_expression* expression) {
+    ast_function(const std::string& name, const std::set<std::string>& parameters, const ast_expression* expression) {
         _name = name;
         _parameters = parameters;
         _expression = expression;
@@ -372,7 +373,7 @@ public:
         return _name;
     }
 
-    const std::vector<std::string> &parameters() const {
+    const std::set<std::string> &parameters() const {
         return _parameters;
     }
 
@@ -441,6 +442,62 @@ public:
     const std::vector<const ast_assignment*>& assignments() const {
         return _assignments;
     }
+};
+
+class iterating_visitor : public visitor
+{
+public:
+	virtual void visit_program(const ast_program* program) {
+		for (auto i = program->functions().cbegin(); i != program->functions().cend(); i++)
+			(*i)->accept(*this);
+
+		for (auto i = program->assignments().cbegin(); i != program->assignments().cend(); i++)
+			(*i)->accept(*this);
+	}
+
+	virtual void visit_function(const ast_function* function) {
+		function->expression()->accept(*this);
+	}
+
+	virtual void visit_assignment(const ast_assignment* assignment) {
+		assignment->expression()->accept(*this);
+	}
+
+	virtual void visit_binary_operator(const ast_binary_operator* binary_operator) {
+		binary_operator->left()->accept(*this);
+		binary_operator->right()->accept(*this);
+	}
+
+	virtual void visit_unary_operator(const ast_unary_operator* unary_operator) {
+		unary_operator->operand()->accept(*this);
+
+
+	}
+
+	virtual void visit_call(const ast_call* call) {
+		for (auto i = call->parameters().cbegin(); i != call->parameters().cend(); i++)
+			(*i)->accept(*this);
+	}
+
+	virtual void visit_logical_binary_operator(const ast_logical_binary_operator* logical_binary_operator) {
+		logical_binary_operator->left()->accept(*this);
+		logical_binary_operator->right()->accept(*this);
+	}
+
+	virtual void visit_logical_not_operator(const ast_logical_not_operator* logical_not_operator) {
+		logical_not_operator->operand()->accept(*this);
+	}
+
+	virtual void visit_condition(const ast_condition* condition) {
+		condition->left()->accept(*this);
+		condition->right()->accept(*this);
+	}
+
+	virtual void visit_if_then_else(const ast_if_then_else* if_then_else) {
+		if_then_else->logical_expression()->accept(*this);
+		if_then_else->then_expression()->accept(*this);
+		if_then_else->else_expression()->accept(*this);
+	}
 };
 
 #endif

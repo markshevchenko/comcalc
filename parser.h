@@ -2,6 +2,7 @@
 #define __PARSER_H__
 
 #include <istream>
+#include <set>
 #include <vector>
 
 #include "ast.h"
@@ -27,7 +28,7 @@ protected:
 
     bool skip(lexem lexem, std::string* token);
 
-    std::vector<std::string> get_parameters();
+    std::set<std::string> get_parameters();
 
     const ast_expression* get_expression();
 
