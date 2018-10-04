@@ -1,10 +1,9 @@
-program: definition new-line-separated-definitions EOF
+program: definition new-line-separated-definitions Eof
 
 new-line-separated-definitions: NewLine definitions
                               | ε
 
 definitions: definition new-line-separated-definitions
-           | ε
 
 definition: Identifier function-or-variable
 

@@ -1,0 +1,46 @@
+program: definitions Eof
+
+definitions: definition NewLine difinitaions
+           | definition
+
+definition: function-definition
+          | assignment
+
+function-definition: Identifier '(' identifiers ')' '=' expression
+
+assignment: Identifier '=' expression
+
+identifiers: Identifier ',' identifiers
+           | Identifier
+
+expression: '-' expression
+          | '+' expression
+          | expression '+' expression
+          | expression '-' expression
+          | expression '*' expression
+          | expression '/' expression
+          | expression '%' expression
+          | expression '^' expression
+          | Constant
+          | Variable
+          | call
+          | '(' expression ')'
+          | 'if' logical-expression 'then' expression 'else' expression
+
+call : Identifier '(' expressions ')'
+
+expressions: expression ',' expressions
+           | expression
+
+logical-expression: 'not' logical-expression
+                  | logical-expression 'and' logical-expression
+                  | logical-expression 'or' logical-expression
+                  | '(' logical-expression ')'
+                  | condition
+
+condition: expression '>' expression
+         | expression '>=' expression
+         | expression '<' expression
+         | expression '<=' expression
+         | expression '<>' expression
+         | expression '=' expression

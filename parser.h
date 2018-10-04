@@ -20,13 +20,13 @@ public:
     ast_program* parse();
 
 protected:
-    void expect(lexem lexem);
+    void expect(lexeme lexem);
 
-    void expect(lexem lexem, std::string* token);
+    void expect(lexeme lexem, std::string* token);
 
-    bool skip(lexem lexem);
+    bool skip(lexeme lexem);
 
-    bool skip(lexem lexem, std::string* token);
+    bool skip(lexeme lexem, std::string* token);
 
     std::set<std::string> get_parameters();
 

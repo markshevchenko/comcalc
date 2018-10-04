@@ -4,7 +4,7 @@
 
 #include "scanner.h"
 
-lexem scanner::read_lexem() {
+lexeme scanner::read_lexeme() {
     _token.clear();
 
     while(skip(' '))
@@ -14,54 +14,54 @@ lexem scanner::read_lexem() {
         while(skip('\n'))
             ;
 
-        return lexem::NewLine;
+        return lexeme::NewLine;
     }
 
     if(take('('))
-        return lexem::LParen;
+        return lexeme::LParen;
 
     if(take(')'))
-        return lexem::RParen;
+        return lexeme::RParen;
   
     if(take(','))
-        return lexem::Comma;
+        return lexeme::Comma;
 
     if(take('+'))
-        return lexem::Plus;
+        return lexeme::Plus;
 
     if(take('-'))
-        return lexem::Minus;
+        return lexeme::Minus;
 
     if(take('*'))
-        return lexem::Star;
+        return lexeme::Star;
 
     if(take('/'))
-        return lexem::Slash;
+        return lexeme::Slash;
 
     if(take('%'))
-        return lexem::Percent;
+        return lexeme::Percent;
 
     if(take('^'))
-        return lexem::Caret;
+        return lexeme::Caret;
 
     if(take('='))
-        return lexem::Eq;
+        return lexeme::Eq;
 
     if(take('>')) {
         if(take('='))
-            return lexem::Ge;
+            return lexeme::Ge;
 
-        return lexem::Gt;
+        return lexeme::Gt;
     }
 
     if(take('<')) {
         if(take('='))
-            return lexem::Le;
+            return lexeme::Le;
             
         if(take('>'))
-            return lexem::Ne;
+            return lexeme::Ne;
 
-        return lexem::Lt;
+        return lexeme::Lt;
     }
 
     if(take(std::isalpha)) {
@@ -69,24 +69,24 @@ lexem scanner::read_lexem() {
             ;
 
         if(_token == "if")
-            return lexem::If;
+            return lexeme::If;
         
         if(_token == "then")
-            return lexem::Then;
+            return lexeme::Then;
         
         if(_token == "else")
-            return lexem::Else;
+            return lexeme::Else;
 
         if(_token == "or")
-            return lexem::Or;
+            return lexeme::Or;
 
         if(_token == "and")
-            return lexem::And;
+            return lexeme::And;
 
         if (_token == "not")
-            return lexem::Not;
+            return lexeme::Not;
 
-        return lexem::Identifier;
+        return lexeme::Identifier;
     }
 
     if(take(std::isdigit)) {
@@ -97,14 +97,14 @@ lexem scanner::read_lexem() {
             while(take(std::isdigit))
                 ;
 
-            return lexem::Double;            
+            return lexeme::Double;            
         }
 
-        return lexem::Integer;
+        return lexeme::Integer;
     }
 
     if(_input.peek() == std::char_traits<char>::eof())
-        return lexem::Eof;
+        return lexeme::Eof;
 
     throw new std::runtime_error("Unknown token '" + _token + "'.");
 }

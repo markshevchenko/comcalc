@@ -4,7 +4,7 @@
 #include <istream>
 #include <string>
 
-enum lexem
+enum lexeme
 {
     NewLine,
     LParen,
@@ -37,7 +37,7 @@ enum lexem
 class scanner
 {
 private:
-    lexem _lexem;
+    lexeme _lexeme;
     std::string _token;
 
     std::istream &_input;
@@ -48,88 +48,88 @@ public:
         next();
     }
 
-    ::lexem lexem() const {
-        return _lexem;
+    ::lexeme lexeme() const {
+        return _lexeme;
     }
 
-    static std::string lexem_str(::lexem lexem) {
+    static std::string lexeme_str(::lexeme lexem) {
         switch(lexem) {
-            case lexem::NewLine:
+            case lexeme::NewLine:
                 return "'\\n'";
                 
-            case lexem::LParen:
+            case lexeme::LParen:
                 return "'('";
                 
-            case lexem::RParen:
+            case lexeme::RParen:
                 return "')'";
                 
-            case lexem::Eq:
+            case lexeme::Eq:
                 return "'='";
                 
-            case lexem::Comma:
+            case lexeme::Comma:
                 return "','";
                 
-            case lexem::Plus:
+            case lexeme::Plus:
                 return "'+'";
                 
-            case lexem::Minus:
+            case lexeme::Minus:
                 return "'-'";
                 
-            case lexem::Star:
+            case lexeme::Star:
                 return "'*'";
                 
-            case lexem::Slash:
+            case lexeme::Slash:
                 return "'/'";
                 
-            case lexem::Percent:
+            case lexeme::Percent:
                 return "'%'";
                 
-            case lexem::Caret:
+            case lexeme::Caret:
                 return "'^'";
                 
-            case lexem::If:
+            case lexeme::If:
                 return "'if'";
                 
-            case lexem::Then:
+            case lexeme::Then:
                 return "'then'";
                 
-            case lexem::Else:
+            case lexeme::Else:
                 return "'else'";
                 
-            case lexem::Or:
+            case lexeme::Or:
                 return "'or'";
                 
-            case lexem::And:
+            case lexeme::And:
                 return "'and'";
                 
-            case lexem::Not:
+            case lexeme::Not:
                 return "'not'";
                 
-            case lexem::Lt:
+            case lexeme::Lt:
                 return "'<='";
                 
-            case lexem::Gt:
+            case lexeme::Gt:
                 return "'>='";
                 
-            case lexem::Le:
+            case lexeme::Le:
                 return "'<'";
                 
-            case lexem::Ge:
+            case lexeme::Ge:
                 return "'>'";
                 
-            case lexem::Ne:
+            case lexeme::Ne:
                 return "'<>'";
                 
-            case lexem::Identifier:
+            case lexeme::Identifier:
                 return "identifier";
                 
-            case lexem::Integer:
+            case lexeme::Integer:
                 return "integer";
                 
-            case lexem::Double:
+            case lexeme::Double:
                 return "double";
                 
-            case lexem::Eof:
+            case lexeme::Eof:
                 return "end of file";
                 
             default:
@@ -142,11 +142,11 @@ public:
     }
 
     void next() {
-        _lexem = read_lexem();
+        _lexeme = read_lexeme();
     }
 
 protected:
-    ::lexem read_lexem();
+    ::lexeme read_lexeme();
 
     bool skip(char c);
 
