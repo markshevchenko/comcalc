@@ -43,8 +43,12 @@ public:
 
 	virtual void visit_assignment(const ast_assignment* assignment) {
 		_parameters.clear();
+		auto declared_identifier = assignment->name();
 
-		_output_variables.insert(assignment->name());
+		if (_output_variables.find(declared_identifier) != _output_variables.end())
+			throw new std::runtime_error("Variable `" + declared_identifier + "` already declared.");
+
+		_output_variables.insert(declared_identifier);
 
 		iterating_visitor::visit_assignment(assignment);
 
@@ -62,6 +66,8 @@ public:
 			&& _standard_functions.find(call->name()) == _standard_functions.end()) {
 			_standard_functions.insert(call->name());
 		}
+
+		iterating_visitor::visit_call(call);
 	}
 };
 
