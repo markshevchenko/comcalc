@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-class pregenerator : public iterating_visitor
+class pregenerator : public visitor
 {
 private:
 	static std::set<std::string> predefined_functions;
@@ -36,7 +36,7 @@ public:
 		auto last_parameter = function->parameters().cend();
 		_parameters.insert(first_parameter, last_parameter);
 
-		iterating_visitor::visit_function(function);
+		visitor::visit_function(function);
 
 		_functions.push_back(function);
 	}
@@ -50,7 +50,7 @@ public:
 
 		_output_variables.insert(declared_identifier);
 
-		iterating_visitor::visit_assignment(assignment);
+		visitor::visit_assignment(assignment);
 
 		_assignments.push_back(assignment);
 	}
@@ -58,7 +58,7 @@ public:
 	virtual void visit_variable(const ast_variable* variable) {
 		_input_variables.insert(variable->name());
 
-		iterating_visitor::visit_variable(variable);
+		visitor::visit_variable(variable);
 	}
 
 	virtual void visit_call(const ast_call* call) {
@@ -67,7 +67,7 @@ public:
 			_standard_functions.insert(call->name());
 		}
 
-		iterating_visitor::visit_call(call);
+		visitor::visit_call(call);
 	}
 };
 

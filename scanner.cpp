@@ -1,11 +1,40 @@
 #include <cctype>
 #include <stdexcept>
-#include <string>
 
 #include "scanner.h"
 
+std::map<lexeme, const char*> scanner::_names =
+{
+	{ lexeme::NewLine, "'\\n'" },
+	{ lexeme::LParen, "'('" },
+	{ lexeme::RParen, "')'" },
+	{ lexeme::Eq, "'='" },
+	{ lexeme::Comma, "','" },
+	{ lexeme::Plus, "'+'" },
+	{ lexeme::Minus, "'-'" },
+	{ lexeme::Star, "'*'" },
+	{ lexeme::Slash, "'/'" },
+	{ lexeme::Percent, "'%'" },
+	{ lexeme::Caret, "'^'" },
+	{ lexeme::If, "'if'" },
+	{ lexeme::Then, "'then'" },
+	{ lexeme::Else, "'else'" },
+	{ lexeme::Or, "'or'" },
+	{ lexeme::And, "'and'" },
+	{ lexeme::Not, "'not'" },
+	{ lexeme::Lt, "'<'" },
+	{ lexeme::Gt, "'>'" },
+	{ lexeme::Le, "'<='" },
+	{ lexeme::Ge, "'>='" },
+	{ lexeme::Ne, "'<>'" },
+	{ lexeme::Identifier, "identifier" },
+	{ lexeme::Integer, "integer" },
+	{ lexeme::Double, "double" },
+	{ lexeme::Eof, "end of file" },
+};
+
 lexeme scanner::read_lexeme() {
-    _token.clear();
+    _buffer.clear();
 
     while(skip(' '))
         ;
@@ -68,22 +97,22 @@ lexeme scanner::read_lexeme() {
         while(take(std::isalnum))
             ;
 
-        if(_token == "if")
+        if(_buffer == "if")
             return lexeme::If;
         
-        if(_token == "then")
+        if(_buffer == "then")
             return lexeme::Then;
         
-        if(_token == "else")
+        if(_buffer == "else")
             return lexeme::Else;
 
-        if(_token == "or")
+        if(_buffer == "or")
             return lexeme::Or;
 
-        if(_token == "and")
+        if(_buffer == "and")
             return lexeme::And;
 
-        if (_token == "not")
+        if (_buffer == "not")
             return lexeme::Not;
 
         return lexeme::Identifier;
@@ -106,7 +135,7 @@ lexeme scanner::read_lexeme() {
     if(_input.peek() == std::char_traits<char>::eof())
         return lexeme::Eof;
 
-    throw new std::runtime_error("Unknown token '" + _token + "'.");
+    throw new std::runtime_error("Unknown token '" + _buffer + "'.");
 }
 
 bool scanner::skip(char c) {
@@ -121,7 +150,7 @@ bool scanner::skip(char c) {
 
 bool scanner::take(char c) {
     if(_input.peek() == c) {
-        _token += _input.get();
+        _buffer += _input.get();
 
         return true;
     }
@@ -131,7 +160,7 @@ bool scanner::take(char c) {
 
 bool scanner::take(int (*function)(int)) {
     if(function(_input.peek())) {
-        _token += _input.get();
+        _buffer += _input.get();
 
         return true;
     }

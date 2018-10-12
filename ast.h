@@ -5,67 +5,21 @@
 #include <set>
 #include <vector>
 
-class ast_program;
-class ast_function;
-class ast_assignment;
-class ast_expression;
-class ast_binary_operator;
-class ast_unary_operator;
-class ast_integer;
-class ast_double;
-class ast_variable;
-class ast_call;
-class ast_logical_expression;
-class ast_logical_binary_operator;
-class ast_logical_not_operator;
-class ast_condition;
-class ast_if_then_else;
+#include "visitor.h"
 
-class visitor
+class ast_node
 {
 public:
-    virtual ~visitor() { }
-
-    virtual void visit_program(const ast_program*) { }
-
-	virtual void visit_function(const ast_function*) { }
-
-	virtual void visit_assignment(const ast_assignment*) { }
-
-	virtual void visit_binary_operator(const ast_binary_operator*) { }
-
-	virtual void visit_unary_operator(const ast_unary_operator*) { }
-
-	virtual void visit_integer(const ast_integer*) { }
-
-	virtual void visit_double(const ast_double*) { }
-
-	virtual void visit_variable(const ast_variable*) { }
-
-	virtual void visit_call(const ast_call*) { }
-
-	virtual void visit_logical_binary_operator(const ast_logical_binary_operator*) { }
-
-	virtual void visit_logical_not_operator(const ast_logical_not_operator*) { }
-
-	virtual void visit_condition(const ast_condition*) { }
-
-	virtual void visit_if_then_else(const ast_if_then_else*) { }
-};
-
-class ast
-{
-public:
-    virtual ~ast() { }
+    virtual ~ast_node() { }
 
     virtual void accept(visitor&) const = 0;
 };
 
-class ast_expression : public ast
+class ast_expression : public ast_node
 {
 };
 
-class ast_logical_expression : public ast
+class ast_logical_expression : public ast_node
 {
 };
 
@@ -347,7 +301,7 @@ public:
 	}
 };
 
-class ast_function : public ast
+class ast_function : public ast_node
 {
 private:
     std::string _name;
@@ -382,7 +336,7 @@ public:
     }
 };
 
-class ast_assignment : public ast
+class ast_assignment : public ast_node
 {
 private:
     std::string _name;
@@ -411,7 +365,7 @@ public:
     }
 };
 
-class ast_program : public ast
+class ast_program : public ast_node
 {
 private:
     std::vector<const ast_function*> _functions;
@@ -442,62 +396,6 @@ public:
     const std::vector<const ast_assignment*>& assignments() const {
         return _assignments;
     }
-};
-
-class iterating_visitor : public visitor
-{
-public:
-	virtual void visit_program(const ast_program* program) {
-		for (auto i = program->functions().cbegin(); i != program->functions().cend(); i++)
-			(*i)->accept(*this);
-
-		for (auto i = program->assignments().cbegin(); i != program->assignments().cend(); i++)
-			(*i)->accept(*this);
-	}
-
-	virtual void visit_function(const ast_function* function) {
-		function->expression()->accept(*this);
-	}
-
-	virtual void visit_assignment(const ast_assignment* assignment) {
-		assignment->expression()->accept(*this);
-	}
-
-	virtual void visit_binary_operator(const ast_binary_operator* binary_operator) {
-		binary_operator->left()->accept(*this);
-		binary_operator->right()->accept(*this);
-	}
-
-	virtual void visit_unary_operator(const ast_unary_operator* unary_operator) {
-		unary_operator->operand()->accept(*this);
-
-
-	}
-
-	virtual void visit_call(const ast_call* call) {
-		for (auto i = call->parameters().cbegin(); i != call->parameters().cend(); i++)
-			(*i)->accept(*this);
-	}
-
-	virtual void visit_logical_binary_operator(const ast_logical_binary_operator* logical_binary_operator) {
-		logical_binary_operator->left()->accept(*this);
-		logical_binary_operator->right()->accept(*this);
-	}
-
-	virtual void visit_logical_not_operator(const ast_logical_not_operator* logical_not_operator) {
-		logical_not_operator->operand()->accept(*this);
-	}
-
-	virtual void visit_condition(const ast_condition* condition) {
-		condition->left()->accept(*this);
-		condition->right()->accept(*this);
-	}
-
-	virtual void visit_if_then_else(const ast_if_then_else* if_then_else) {
-		if_then_else->logical_expression()->accept(*this);
-		if_then_else->then_expression()->accept(*this);
-		if_then_else->else_expression()->accept(*this);
-	}
 };
 
 #endif

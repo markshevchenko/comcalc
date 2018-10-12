@@ -1,75 +1,51 @@
-program: definition new-line-separated-definitions Eof
+program: definitions Eof
 
-new-line-separated-definitions: NewLine definitions
-                              | ε
+definitions: definition
+           | definitions NewLine difinitaion
 
-definitions: definition new-line-separated-definitions
+definition: function
+          | assignment
 
-definition: Identifier function-or-variable
+function: Identifier '(' parameters ')' '=' expression
 
-function-or-variable: '(' Identifier comma-separated-identifiers ')' '=' expression
-                    | '=' expression
+assignment: Identifier '=' expression
 
-comma-separated-identifiers: ',' Identifier comma-separated-identifiers
-                           | ε
+parameters: Identifier
+          | parameters ',' Identifier
 
+expression: '-' expression
+          | '+' expression
+          | expression '+' expression
+          | expression '-' expression
+          | expression '*' expression
+          | expression '/' expression
+          | expression '%' expression
+          | expression '^' expression
+          | constant
+          | variable
+          | call
+          | '(' expression ')'
+          | 'if' logical-expression 'then' expression 'else' expression
 
-expression: operand1 operator-separated-operands1
+constant: Integer
+        | Double
 
-operator-separated-operands1: '+' operand1 operator-separated-operands1
-                            | '-' operand1 operator-separated-operands1
-                            | ε
+variable: Identifier
 
-operand1: operand2 operator-separated-operands2
+call : Identifier '(' expressions ')'
 
-operator-separated-operands2: '*' operand2 operator-separated-operands2
-                            | '/' operand2 operator-separated-operands2
-                            | '%' operand2 operator-separated-operands2
-                            | ε
+expressions: expression
+           | expressions ',' expression
 
-operand2: operand3 operands3
+logical-expression: 'not' logical-expression
+                  | logical-expression 'and' logical-expression
+                  | logical-expression 'or' logical-expression
+                  | '(' logical-expression ')'
+                  | condition
 
-operands3: '^' operand2
-         | ε
-
-operand3: '-' operand4
-        | '+' operand4
-        | operand4
-
-operand4: call-or-variable
-        | Constant
-        | 'if' logical-expession 'then' expression 'else' expression
-        | '(' expression ')'
-
-call-or-variable: Identifier possible-call
-
-possible-call: '(' expression comma-separated-expressions ')'
-             | ε
-           
-comma-separated-expressions: ',' expression comma-separated-expressions
-                           | ε
-
-logical-expression: logical-operand1 operator-separated-logical-operands1
-
-operator-separated-logical-operands1: 'or' logical-operand1 operator-separated-logical-operands1
-                                    | ε
-
-logical-operand1: logical-operand2 operator-separated-logical-operands1
-
-operator-separated-logical-operands2: 'and' logical-operand2 operator-separated-logical-operands2
-                                    | ε
-
-logical-operand2: 'not' logical-operand3
-                | logical-operand3
-
-logical-operand3: condition
-                | '(' lexpression ')'
-
-condition: expression comparison
-
-comparison: '>' expression
-          | '>=' expression
-          | '<' expression
-          | '<=' expression
-          | '<>' expression
-          | '=' expression
+condition: expression '>' expression
+         | expression '>=' expression
+         | expression '<' expression
+         | expression '<=' expression
+         | expression '<>' expression
+         | expression '=' expression

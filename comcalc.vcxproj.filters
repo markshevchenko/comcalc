@@ -27,13 +27,13 @@
     <ClInclude Include="scanner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="llvm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pregenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="generator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="visitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,7 +50,10 @@
     <ClCompile Include="scanner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="llvm.cpp">
+    <ClCompile Include="visitor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="generator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,6 +63,7 @@
     <None Include="quadratic.comcalc" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="rules.txt" />
+    <Text Include="grammar-ll%281%29.txt" />
+    <Text Include="grammar.txt" />
   </ItemGroup>
 </Project>

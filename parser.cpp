@@ -7,7 +7,7 @@
 #include "parser.h"
 #include "scanner.h"
 
-ast_program* parser::parse() {
+const ast_program* parser::parse_program() {
     std::vector<const ast_function*> functions;
     std::vector<const ast_assignment*> assignments;
 
@@ -17,12 +17,12 @@ ast_program* parser::parse() {
 
 
 		if (skip(lexeme::LParen)) {
-			std::set<std::string> parameters = get_parameters();
+			std::set<std::string> parameters = parse_parameters();
 
 			expect(lexeme::RParen);
 			expect(lexeme::Eq);
 
-			const ast_expression* expression = get_expression();
+			const ast_expression* expression = parse_expression();
 
 			ast_function* function = new ast_function(name, parameters, expression);
 			functions.push_back(function);
@@ -30,7 +30,7 @@ ast_program* parser::parse() {
         else {
             expect(lexeme::Eq);
 
-            const ast_expression* expression = get_expression();
+            const ast_expression* expression = parse_expression();
 
             ast_assignment* assignment = new ast_assignment(name, expression);
 			assignments.push_back(assignment);
@@ -44,69 +44,35 @@ ast_program* parser::parse() {
     return new ast_program(functions, assignments);
 }
 
-void parser::expect(lexeme lexem) {
-    if (scanner.lexeme() != lexem)
-        throw new std::runtime_error("Lexem " + scanner::lexeme_str(lexem) + " expected, but " + scanner::lexeme_str(scanner.lexeme()) + " read.");
-
-    scanner.next();
+template<typename T>
+bool is_contains(std::set<T> set, T element) {
+	return set.find(element) != set.end();
 }
 
-void parser::expect(lexeme lexem, std::string* token) {
-    if (scanner.lexeme() != lexem)
-        throw new std::runtime_error("Lexem " + scanner::lexeme_str(lexem) + " expected, but " + scanner::lexeme_str(scanner.lexeme()) + " read.");
-
-    *token = scanner.token();
-
-    scanner.next();
-}
-
-bool parser::skip(lexeme lexem) {
-    if (scanner.lexeme() == lexem) {
-        scanner.next();
-
-        return true;
-    }
-
-    return false;
-}
-
-bool parser::skip(lexeme lexem, std::string* token) {
-    if (scanner.lexeme() == lexem) {
-        *token = scanner.token();
-
-        scanner.next();
-
-        return true;
-    }
-
-    return false;
-    
-}
-
-std::set<std::string> parser::get_parameters() {
-    std::set<std::string> result;
+std::set<std::string> parser::parse_parameters() {
+    std::set<std::string> parameters;
 
     do {
         std::string identifier;
 
         expect(lexeme::Identifier, &identifier);
 
-		if (result.find(identifier) != result.end())
+		if (is_contains(parameters, identifier))
 			throw new std::runtime_error("Dublicate parameter `" + identifier + "`.");
 
-        result.insert(identifier);
+        parameters.insert(identifier);
     } while (skip(lexeme::Comma));
 
-    return result;
+    return parameters;
 }
 
-const ast_expression* parser::get_expression() {
-    const ast_expression* left = get_operand1();
+const ast_expression* parser::parse_expression() {
+    const ast_expression* left = parse_operand1();
 
-    return get_operator_separated_operands1(left);
+    return parse_separated_operands1(left);
 }
 
-const ast_expression* parser::get_operator_separated_operands1(const ast_expression* left) {
+const ast_expression* parser::parse_separated_operands1(const ast_expression* left) {
     std::string operation;
     if (skip(lexeme::Plus))
         operation = '+';
@@ -115,19 +81,19 @@ const ast_expression* parser::get_operator_separated_operands1(const ast_express
     else
         return left;
 
-    const ast_expression* right = get_operand1();
+    const ast_expression* right = parse_operand1();
     ast_expression* binary_operator = new ast_binary_operator(operation, left, right);
 
-    return get_operator_separated_operands1(binary_operator);
+    return parse_separated_operands1(binary_operator);
 }
 
-const ast_expression* parser::get_operand1() {
-    const ast_expression* left = get_operand2();
+const ast_expression* parser::parse_operand1() {
+    const ast_expression* left = parse_operand2();
 
-    return get_operator_separated_operands2(left);
+    return parse_separated_operands2(left);
 }
 
-const ast_expression* parser::get_operator_separated_operands2(const ast_expression* left) {
+const ast_expression* parser::parse_separated_operands2(const ast_expression* left) {
     std::string operation;
     if (skip(lexeme::Star))
         operation = '*';
@@ -138,17 +104,17 @@ const ast_expression* parser::get_operator_separated_operands2(const ast_express
     else
         return left;
 
-    const ast_expression* right = get_operand2();
+    const ast_expression* right = parse_operand2();
     ast_expression* binary_operator = new ast_binary_operator(operation, left, right);
 
-    return get_operator_separated_operands2(binary_operator);
+    return parse_separated_operands2(binary_operator);
 }
 
-const ast_expression* parser::get_operand2() {
-    const ast_expression* left = get_operand3();
+const ast_expression* parser::parse_operand2() {
+    const ast_expression* left = parse_operand3();
 
     while (skip(lexeme::Caret)) {
-        const ast_expression* right = get_operand2();
+        const ast_expression* right = parse_operand2();
 
         left = new ast_binary_operator("^", left, right);
     }
@@ -156,25 +122,25 @@ const ast_expression* parser::get_operand2() {
     return left;
 }
 
-const ast_expression* parser::get_operand3() {
+const ast_expression* parser::parse_operand3() {
     if (skip(lexeme::Minus))
-        return new ast_unary_operator("-", get_operand4());
+        return new ast_unary_operator("-", parse_operand4());
 
     if (skip(lexeme::Plus))
-        return new ast_unary_operator("+", get_operand4());
+        return new ast_unary_operator("+", parse_operand4());
     
-    return get_operand4();
+    return parse_operand4();
 }
 
-const ast_expression* parser::get_operand4() {
+const ast_expression* parser::parse_operand4() {
     std::string token;
     if (skip(lexeme::Identifier, &token)) {
         if (skip(lexeme::LParen)) {
             std::vector<const ast_expression*> parameters;
-            parameters.push_back(get_expression());
+            parameters.push_back(parse_expression());
 
             while (skip(lexeme::Comma))
-                parameters.push_back(get_expression());
+                parameters.push_back(parse_expression());
 
             expect(lexeme::RParen);
 
@@ -194,20 +160,20 @@ const ast_expression* parser::get_operand4() {
         return new ast_double(value);
     }
     else if (skip(lexeme::If)) {
-		const ast_logical_expression* logical_expression = get_logical_expression();
+		const ast_logical_expression* logical_expression = parse_logical_expression();
 
 		expect(lexeme::Then);
 
-		const ast_expression* then_expression = get_expression();
+		const ast_expression* then_expression = parse_expression();
 
 		expect(lexeme::Else);
 
-		const ast_expression* else_expression = get_expression();
+		const ast_expression* else_expression = parse_expression();
 
 		return new ast_if_then_else(logical_expression, then_expression, else_expression);
     }
     else if (skip(lexeme::LParen)) {
-        const ast_expression* expression = get_expression();
+        const ast_expression* expression = parse_expression();
 		expect(lexeme::RParen);
 
 		return expression;
@@ -216,65 +182,65 @@ const ast_expression* parser::get_operand4() {
     throw new std::runtime_error("Operand expected.");
 }
 
-const ast_logical_expression* parser::get_logical_expression() {
-	const ast_logical_expression* left = get_logical_operand1();
+const ast_logical_expression* parser::parse_logical_expression() {
+	const ast_logical_expression* left = parse_logical_operand1();
 
-	return get_operator_separated_logical_operands1(left);
+	return parse_separated_logical_operands1(left);
 }
 
-const ast_logical_expression* parser::get_logical_operand1() {
-	const ast_logical_expression* left = get_logical_operand2();
+const ast_logical_expression* parser::parse_logical_operand1() {
+	const ast_logical_expression* left = parse_logical_operand2();
 
-	return get_operator_separated_logical_operands2(left);
+	return parse_separated_logical_operands2(left);
 }
 
-const ast_logical_expression* parser::get_operator_separated_logical_operands1(const ast_logical_expression* left) {
+const ast_logical_expression* parser::parse_separated_logical_operands1(const ast_logical_expression* left) {
 	if (skip(lexeme::Or)) {
-		const ast_logical_expression* right = get_logical_operand1();
+		const ast_logical_expression* right = parse_logical_operand1();
 		ast_logical_expression* binary_operator = new ast_logical_binary_operator("or", left, right);
 
-		return get_operator_separated_logical_operands1(binary_operator);
+		return parse_separated_logical_operands1(binary_operator);
 	}
 
 	return left;
 }
 
-const ast_logical_expression* parser::get_logical_operand2() {
+const ast_logical_expression* parser::parse_logical_operand2() {
 	if (skip(lexeme::Not)) {
-		const ast_logical_expression* operand = get_logical_operand3();
+		const ast_logical_expression* operand = parse_logical_operand3();
 
 		return new ast_logical_not_operator(operand);
 	}
 
-	return get_logical_operand3();
+	return parse_logical_operand3();
 }
 
-const ast_logical_expression* parser::get_operator_separated_logical_operands2(const ast_logical_expression* left) {
+const ast_logical_expression* parser::parse_separated_logical_operands2(const ast_logical_expression* left) {
 	if (skip(lexeme::And)) {
-		const ast_logical_expression* right = get_logical_operand1();
+		const ast_logical_expression* right = parse_logical_operand1();
 		ast_logical_expression* binary_operator = new ast_logical_binary_operator("and", left, right);
 
-		return get_operator_separated_logical_operands2(binary_operator);
+		return parse_separated_logical_operands2(binary_operator);
 	}
 
 	return left;
 }
 
-const ast_logical_expression* parser::get_logical_operand3() {
+const ast_logical_expression* parser::parse_logical_operand3() {
 	if (skip(lexeme::LParen)) {
-		const ast_logical_expression* logical_expression = get_logical_expression();
+		const ast_logical_expression* logical_expression = parse_logical_expression();
 
 		expect(lexeme::RParen);
 
 		return logical_expression;
 	}
 
-	return get_condition();
+	return parse_condition();
 }
 
-const ast_logical_expression* parser::get_condition() {
+const ast_logical_expression* parser::parse_condition() {
 	std::string operation;
-	const ast_expression* left = get_expression();
+	const ast_expression* left = parse_expression();
 
 	if (skip(lexeme::Gt))
 		operation = ">";
@@ -291,7 +257,50 @@ const ast_logical_expression* parser::get_condition() {
 	else
 		throw new std::runtime_error("Comparison operator expected.");
 
-	const ast_expression* right = get_expression();
+	const ast_expression* right = parse_expression();
 
 	return new ast_condition(operation, left, right);
 }
+
+void throw_if_unexpected_lexeme(lexeme expected_lexeme, lexeme actual_lexeme) {
+	if (expected_lexeme != actual_lexeme)
+		throw new std::runtime_error("Lexem " + scanner::name(expected_lexeme)
+			+ " expected, but " + scanner::name(actual_lexeme) + " read.");
+}
+
+void parser::expect(lexeme lexeme) {
+	throw_if_unexpected_lexeme(lexeme, scanner.lexeme());
+
+	scanner.next();
+}
+
+void parser::expect(lexeme lexeme, std::string* buffer) {
+	throw_if_unexpected_lexeme(lexeme, scanner.lexeme());
+
+	*buffer = scanner.buffer();
+
+	scanner.next();
+}
+
+bool parser::skip(lexeme lexeme) {
+	if (scanner.lexeme() == lexeme) {
+		scanner.next();
+
+		return true;
+	}
+
+	return false;
+}
+
+bool parser::skip(lexeme lexeme, std::string* buffer) {
+	if (scanner.lexeme() == lexeme) {
+		*buffer = scanner.buffer();
+
+		scanner.next();
+
+		return true;
+	}
+
+	return false;
+}
+

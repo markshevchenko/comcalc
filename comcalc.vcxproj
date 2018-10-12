@@ -21,18 +21,19 @@
   <ItemGroup>
     <ClInclude Include="ast.h" />
     <ClInclude Include="generator.h" />
-    <ClInclude Include="llvm.h" />
     <ClInclude Include="pregenerator.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="printer.h" />
     <ClInclude Include="scanner.h" />
+    <ClInclude Include="visitor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="comcalc.cpp" />
-    <ClCompile Include="llvm.cpp" />
+    <ClCompile Include="generator.cpp" />
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="printer.cpp" />
     <ClCompile Include="scanner.cpp" />
+    <ClCompile Include="visitor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fibonacci.comcalc">
@@ -44,7 +45,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="rules.txt" />
+    <Text Include="grammar.txt" />
+    <Text Include="grammar-ll%281%29.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

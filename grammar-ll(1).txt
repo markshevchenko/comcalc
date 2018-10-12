@@ -1,0 +1,77 @@
+program: definitions Eof
+
+definitions: definition separated-definitions
+
+separated-definitions: NewLine definitions
+                     | ε
+
+definition: Identifier function-or-variable
+
+function-or-variable: '(' parameters ')' '=' expression
+                    | '=' expression
+
+parameters: Identifier separated-parameters
+
+separated-parameters: ',' parameters
+                    | ε
+
+expression: operand1 separated-operands1
+
+separated-operands1: '+' operand1 separated-operands1
+                   | '-' operand1 separated-operands1
+                   | ε
+
+operand1: operand2 separated-operands2
+
+separated-operands2: '*' operand2 separated-operands2
+                   | '/' operand2 separated-operands2
+                   | '%' operand2 separated-operands2
+                   | ε
+
+operand2: operand3 operands3
+
+operands3: '^' operand2
+         | ε
+
+operand3: '-' operand4
+        | '+' operand4
+        | operand4
+
+operand4: Variable possible-call
+        | Integer
+		| Double
+        | 'if' logical-expession 'then' expression 'else' expression
+        | '(' expression ')'
+
+possible-call: '(' expressions ')'
+             | ε
+
+expressions: expression separated-expressions
+
+separated-expressions: ',' expression separated-expressions
+                     | ε
+
+logical-expression: logical-operand1 separated-logical-operands1
+
+separated-logical-operands1: 'or' logical-operand1 separated-logical-operands1
+                           | ε
+
+logical-operand1: logical-operand2 separated-logical-operands1
+
+separated-logical-operands2: 'and' logical-operand2 separated-logical-operands2
+                           | ε
+
+logical-operand2: 'not' logical-operand3
+                | logical-operand3
+
+logical-operand3: condition
+                | '(' logical-expression ')'
+
+condition: expression comparison
+
+comparison: '>' expression
+          | '>=' expression
+          | '<' expression
+          | '<=' expression
+          | '<>' expression
+          | '=' expression

@@ -42,7 +42,7 @@ public:
 	}
 };
 
-class print_visitor : public iterating_visitor
+class print_visitor : public visitor
 {
 private:
 	printer _printer;
@@ -61,7 +61,7 @@ public:
 			_printer.printline(*i);
 		}
 
-		iterating_visitor::visit_function(function);
+		visitor::visit_function(function);
 
 		_printer.unindent();
 	}
@@ -72,7 +72,7 @@ public:
 
 		_printer.indent();
 
-		iterating_visitor::visit_assignment(assignment);
+		visitor::visit_assignment(assignment);
 
 		_printer.unindent();
 	}
@@ -83,7 +83,7 @@ public:
 
 		_printer.indent();
 
-		iterating_visitor::visit_binary_operator(binary_operator);
+		visitor::visit_binary_operator(binary_operator);
 
 		_printer.unindent();
 	}
@@ -94,7 +94,7 @@ public:
 
 		_printer.indent();
 
-		iterating_visitor::visit_unary_operator(unary_operator);
+		visitor::visit_unary_operator(unary_operator);
 
 		_printer.unindent();
 	}
@@ -120,7 +120,7 @@ public:
 
 		_printer.indent();
 
-		iterating_visitor::visit_call(call);
+		visitor::visit_call(call);
 
 		_printer.unindent();
 	}
@@ -131,7 +131,7 @@ public:
 
 		_printer.indent();
 
-		iterating_visitor::visit_logical_binary_operator(logical_binary_operator);
+		visitor::visit_logical_binary_operator(logical_binary_operator);
 
 		_printer.unindent();
 	}
@@ -152,7 +152,7 @@ public:
 
 		_printer.indent();
 
-		iterating_visitor::visit_condition(condition);
+		visitor::visit_condition(condition);
 
 		_printer.unindent();
 	}
@@ -162,7 +162,7 @@ public:
 
 		_printer.indent();
 
-		iterating_visitor::visit_if_then_else(if_then_else);
+		visitor::visit_if_then_else(if_then_else);
 
 		_printer.unindent();
 	}
