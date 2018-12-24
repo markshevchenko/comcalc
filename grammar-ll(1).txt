@@ -10,7 +10,7 @@ definition: Identifier function-or-variable
 function-or-variable: '(' parameters ')' '=' expression
                     | '=' expression
 
-parameters: Identifier separated-parameters
+parameters: variable separated-parameters
 
 separated-parameters: ',' parameters
                     | ε
@@ -37,14 +37,18 @@ operand3: '-' operand4
         | '+' operand4
         | operand4
 
-operand4: Variable possible-call
+operand4: Variable variable-tail
         | Integer
 		| Double
         | 'if' logical-expession 'then' expression 'else' expression
         | '(' expression ')'
 
-possible-call: '(' expressions ')'
+variable-tail: '(' expressions ')'
+             : ':' type
              | ε
+
+type: 'int'
+    | 'real'
 
 expressions: expression separated-expressions
 

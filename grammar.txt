@@ -10,8 +10,8 @@ function: Identifier '(' parameters ')' '=' expression
 
 assignment: Identifier '=' expression
 
-parameters: Identifier
-          | parameters ',' Identifier
+parameters: variable
+          | parameters ',' variable
 
 expression: '-' expression
           | '+' expression
@@ -31,6 +31,10 @@ constant: Integer
         | Double
 
 variable: Identifier
+        | Identifier ':' type
+
+type: 'int'
+    : 'real'
 
 call : Identifier '(' expressions ')'
 

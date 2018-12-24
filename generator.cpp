@@ -1,25 +1,72 @@
 #include <map>
 #include <stack>
 
-#include "pregenerator.h"
 #include "generator.h"
+#include "expression.h"
 
-static std::string integer_first_letters = "ijklmnIJKLMN";
-
-enum expression_type
+class step1 : public visitor
 {
-	I64,
-	DOUBLE,
+private:
+	static std::set<std::string> predefined_functions;
+
+	std::set<std::string> _parameters;
+	std::set<std::string> _input_variables;
+	std::set<std::string> _output_variables;
+	std::set<std::string> _standard_functions;
+	std::vector<const ast_function*> _functions;
+	std::vector<const ast_assignment*> _assignments;
+
+public:
+	const std::set<std::string> &input_variables() const { return _input_variables; }
+
+	const std::set<std::string> &output_variables() const { return _output_variables; }
+
+	const std::set<std::string> &standard_functions() const { return _standard_functions; }
+
+	const std::vector<const ast_function*> &functions() const { return _functions; }
+
+	const std::vector<const ast_assignment*> &assignments() const { return _assignments; }
+
+	virtual void visit_function(const ast_function* function) {
+		_parameters.clear();
+		auto first_parameter = function->parameters().cbegin();
+		auto last_parameter = function->parameters().cend();
+		_parameters.insert(first_parameter, last_parameter);
+
+		visitor::visit_function(function);
+
+		_functions.push_back(function);
+	}
+
+	virtual void visit_assignment(const ast_assignment* assignment) {
+		_parameters.clear();
+		auto declared_identifier = assignment->name();
+
+		if (_output_variables.find(declared_identifier) != _output_variables.end())
+			throw new std::runtime_error("Variable `" + declared_identifier + "` already declared.");
+
+		_output_variables.insert(declared_identifier);
+
+		visitor::visit_assignment(assignment);
+
+		_assignments.push_back(assignment);
+	}
+
+	virtual void visit_variable(const ast_variable* variable) {
+		_input_variables.insert(variable->name());
+
+		visitor::visit_variable(variable);
+	}
+
+	virtual void visit_call(const ast_call* call) {
+		if (predefined_functions.find(call->name()) != predefined_functions.end()
+			&& _standard_functions.find(call->name()) == _standard_functions.end()) {
+			_standard_functions.insert(call->name());
+		}
+
+		visitor::visit_call(call);
+	}
 };
-
-expression_type get_variable_type(const std::string& variable_name) {
-	auto first_variable_letter = variable_name[0];
-
-	if (integer_first_letters.find(first_variable_letter) == std::string::npos)
-		return DOUBLE;
-
-	return I64;
-}
 
 std::set<std::string> operator -(const std::set<std::string> &a, const std::set<std::string> &b) {
 	std::set<std::string> result;
@@ -60,21 +107,6 @@ std::string get_output_format(const std::string& variable_name) {
 		return "c\"" + variable_name + " = %lf\\0A\\00\"";
 
 	return "c\"" + variable_name + " = %ld\\0A\\00\"";
-}
-
-struct expression_node
-{
-	int index;
-	expression_type type;
-
-	expression_node(int index, expression_type type) : index(index), type(type) { }
-};
-
-std::string get_node_as_text(expression_node node) {
-	if (node.type == DOUBLE)
-		return "double %" + std::to_string(node.index);
-
-	return "i64 %" + std::to_string(node.index);
 }
 
 class generator : public visitor
@@ -169,7 +201,7 @@ private:
 	void set_named_variable_index(const std::string& variable_name, expression_node node) {
 		_named_variables[variable_name] = node.index;
 
-		if (node.type == DOUBLE)
+		if (node._type == DOUBLE)
 			_out << "  store double %" << node.index << ", double* @" << variable_name << ", align 8" << std::endl;
 		else
 			_out << "  store i64 %" << node.index << ", i64* @" << variable_name << ", align 8" << std::endl;
@@ -248,7 +280,7 @@ public:
 		auto expression = _expressions.top();
 		_expressions.pop();
 
-		if (get_variable_type(declared_identifier) != expression.type)
+		if (get_variable_type(declared_identifier) != expression._type)
 			throw new std::runtime_error("Incompatible type of variable `" + declared_identifier + "`.");
 
 		set_named_variable_index(declared_identifier, expression);
@@ -311,12 +343,12 @@ public:
 		_expressions.pop();
 
 		int index = get_next_variable_index();
-		if (operand.type == DOUBLE)
+		if (operand._type == DOUBLE)
 			_out << "  %" << index << +" = fsub double 0.0, %" << operand.index << std::endl;
 		else
 			_out << "  %" << index << +" = sub i64 0, %" << operand.index << std::endl;
 
-		_expressions.push(expression_node(index, operand.type));
+		_expressions.push(expression_node(index, operand._type));
 	}
 
 	virtual void visit_binary_operator(const ast_binary_operator* binary_operator) {
@@ -328,17 +360,17 @@ public:
 		expression_node left = _expressions.top();
 		_expressions.pop();
 
-		if (left.type == DOUBLE && right.type == I64)
+		if (left._type == DOUBLE && right._type == I64)
 			right = cast_to_double(right);
-		else if (left.type == I64 && right.type == DOUBLE)
+		else if (left._type == I64 && right._type == DOUBLE)
 			left = cast_to_double(left);
-		else if (left.type == I64 && right.type == I64 && binary_operator->operation() == "^") {
+		else if (left._type == I64 && right._type == I64 && binary_operator->operation() == "^") {
 			left = cast_to_double(left);
 			right = cast_to_double(right);
 		}
 
 		int index = get_next_variable_index();
-		expression_type type = left.type;
+		expression_type type = left._type;
 
 		if (type == DOUBLE) {
 			if (binary_operator->operation() == "+")

@@ -20,8 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ast.h" />
+    <ClInclude Include="expression.h" />
     <ClInclude Include="generator.h" />
-    <ClInclude Include="pregenerator.h" />
     <ClInclude Include="parser.h" />
     <ClInclude Include="printer.h" />
     <ClInclude Include="scanner.h" />
@@ -29,6 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="comcalc.cpp" />
+    <ClCompile Include="expression.cpp" />
     <ClCompile Include="generator.cpp" />
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="printer.cpp" />
