@@ -25,15 +25,21 @@
     <ClInclude Include="parser.h" />
     <ClInclude Include="printer.h" />
     <ClInclude Include="scanner.h" />
+    <ClInclude Include="step1_tables_builder.h" />
+    <ClInclude Include="step2_generator.h" />
+    <ClInclude Include="table_registry.h" />
     <ClInclude Include="visitor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="comcalc.cpp" />
     <ClCompile Include="expression.cpp" />
     <ClCompile Include="generator.cpp" />
+    <ClCompile Include="name_table.cpp" />
     <ClCompile Include="parser.cpp" />
     <ClCompile Include="printer.cpp" />
     <ClCompile Include="scanner.cpp" />
+    <ClCompile Include="step1_tables_builder.cpp" />
+    <ClCompile Include="step2_generator.cpp" />
     <ClCompile Include="visitor.cpp" />
   </ItemGroup>
   <ItemGroup>

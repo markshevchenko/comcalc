@@ -152,7 +152,7 @@ const ast_expression* parser::parse_operand4() {
     else if (skip(lexeme::Integer, &token)) {
         int value = std::stoi(token);
 
-        return new ast_integer(value);
+        return new ast_long(value);
     }
     else if (skip(lexeme::Double, &token)) {
         double value = std::stod(token);

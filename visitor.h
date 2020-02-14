@@ -7,7 +7,7 @@ class ast_assignment;
 class ast_expression;
 class ast_binary_operator;
 class ast_unary_operator;
-class ast_integer;
+class ast_long;
 class ast_double;
 class ast_variable;
 class ast_call;
@@ -32,7 +32,7 @@ public:
 
 	virtual void visit_unary_operator(const ast_unary_operator* unary_operator);
 
-	virtual void visit_integer(const ast_integer*);
+	virtual void visit_long(const ast_long*);
 
 	virtual void visit_double(const ast_double*);
 

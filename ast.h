@@ -5,6 +5,7 @@
 #include <set>
 #include <vector>
 
+#include "expression.h"
 #include "visitor.h"
 
 class ast_node
@@ -183,21 +184,21 @@ public:
     }
 };
 
-class ast_integer : public ast_expression
+class ast_long : public ast_expression
 {
 private:
-    int _value;
+    long _value;
 
 public:
-    ast_integer(int value) {
+    ast_long(long value) {
         _value = value;
     }
 
     virtual void accept(visitor& visitor) const {
-        visitor.visit_integer(this);
+        visitor.visit_long(this);
     }
 
-    int value() const {
+    long value() const {
         return _value;
     }
 };
@@ -225,14 +226,28 @@ class ast_variable : public ast_expression
 {
 private:
     std::string _name;
+    bool _hasType;
+    expression_type _type;
 
 public:
     ast_variable(std::string name) {
         _name = name;
+        _hasType = false;
+        _type = (expression_type)0;
+    }
+
+    ast_variable(std::string name, expression_type type) {
+        _name = name;
+        _hasType = true;
+        _type = type;
     }
 
     virtual void accept(visitor& visitor) const {
         visitor.visit_variable(this);
+    }
+
+    expression_type get_type() const {
+        return _type;
     }
 
     const std::string &name() const {
@@ -305,11 +320,11 @@ class ast_function : public ast_node
 {
 private:
     std::string _name;
-    std::set<std::string> _parameters;
+    std::map<std::string, expression_type> _parameters;
     const ast_expression* _expression;
 
 public:
-    ast_function(const std::string& name, const std::set<std::string>& parameters, const ast_expression* expression) {
+    ast_function(const std::string& name, const std::map<std::string, expression_type>& parameters, const ast_expression* expression) {
         _name = name;
         _parameters = parameters;
         _expression = expression;
@@ -327,7 +342,7 @@ public:
         return _name;
     }
 
-    const std::set<std::string> &parameters() const {
+    const std::map<std::string, expression_type> &parameters() const {
         return _parameters;
     }
 

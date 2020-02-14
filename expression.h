@@ -1,9 +1,11 @@
 #ifndef __EXPRESSION_H__
 #define __EXPRESSION_H__
 
-enum expression_type
+#include <string>
+
+enum class expression_type
 {
-	I64,
+	LONG = 1,
 	DOUBLE,
 };
 
@@ -24,6 +26,5 @@ public:
 std::string get_node_as_text(expression_node node);
 
 expression_type get_variable_type(const std::string& variable_name);
-
 
 #endif

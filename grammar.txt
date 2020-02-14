@@ -27,14 +27,14 @@ expression: '-' expression
           | '(' expression ')'
           | 'if' logical-expression 'then' expression 'else' expression
 
-constant: Integer
+constant: Long
         | Double
 
 variable: Identifier
         | Identifier ':' type
 
-type: 'int'
-    : 'real'
+type: 'long'
+    : 'double'
 
 call : Identifier '(' expressions ')'
 

@@ -27,7 +27,7 @@ void visitor::visit_unary_operator(const ast_unary_operator* unary_operator) {
 	unary_operator->operand()->accept(*this);
 }
 
-void visitor::visit_integer(const ast_integer*) { }
+void visitor::visit_long(const ast_long*) { }
 
 void visitor::visit_double(const ast_double*) { }
 

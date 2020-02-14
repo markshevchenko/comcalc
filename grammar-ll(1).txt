@@ -38,7 +38,7 @@ operand3: '-' operand4
         | operand4
 
 operand4: Variable variable-tail
-        | Integer
+        | Long
 		| Double
         | 'if' logical-expession 'then' expression 'else' expression
         | '(' expression ')'
@@ -47,8 +47,8 @@ variable-tail: '(' expressions ')'
              : ':' type
              | ε
 
-type: 'int'
-    | 'real'
+type: 'long'
+    | 'double'
 
 expressions: expression separated-expressions
 

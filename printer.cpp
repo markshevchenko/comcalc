@@ -99,7 +99,7 @@ public:
 		_printer.unindent();
 	}
 
-	virtual void visit_integer(const ast_integer* i) {
+	virtual void visit_integer(const ast_long* i) {
 		_printer.print("integer ");
 		_printer.printline(std::to_string(i->value()));
 	}
