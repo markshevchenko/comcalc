@@ -16,6 +16,7 @@ std::map<lexeme, const char*> scanner::_names =
 	{ lexeme::Slash, "'/'" },
 	{ lexeme::Percent, "'%'" },
 	{ lexeme::Caret, "'^'" },
+    { lexeme::Colon, ":" },
 	{ lexeme::If, "'if'" },
 	{ lexeme::Then, "'then'" },
 	{ lexeme::Else, "'else'" },
@@ -28,118 +29,127 @@ std::map<lexeme, const char*> scanner::_names =
 	{ lexeme::Ge, "'>='" },
 	{ lexeme::Ne, "'<>'" },
 	{ lexeme::Identifier, "identifier" },
-	{ lexeme::Integer, "integer" },
-	{ lexeme::Double, "double" },
+	{ lexeme::LongConstant, "long" },
+	{ lexeme::DoubleConstant, "double" },
 	{ lexeme::Eof, "end of file" },
 };
 
 lexeme scanner::read_lexeme() {
     _buffer.clear();
 
-    while(skip(' '))
+    while (skip(' '))
         ;
 
-    if(skip('\n')) {
+    if (skip('\n')) {
         while(skip('\n'))
             ;
 
         return lexeme::NewLine;
     }
 
-    if(take('('))
+    if (take('('))
         return lexeme::LParen;
 
-    if(take(')'))
+    if (take(')'))
         return lexeme::RParen;
   
-    if(take(','))
+    if (take(','))
         return lexeme::Comma;
 
-    if(take('+'))
+    if (take('+'))
         return lexeme::Plus;
 
-    if(take('-'))
+    if (take('-'))
         return lexeme::Minus;
 
-    if(take('*'))
+    if (take('*'))
         return lexeme::Star;
 
-    if(take('/'))
+    if (take('/'))
         return lexeme::Slash;
 
-    if(take('%'))
+    if (take('%'))
         return lexeme::Percent;
 
-    if(take('^'))
+    if (take('^'))
         return lexeme::Caret;
 
-    if(take('='))
+    if (take(':'))
+        return lexeme::Colon;
+
+    if (take('='))
         return lexeme::Eq;
 
-    if(take('>')) {
-        if(take('='))
+    if (take('>')) {
+        if (take('='))
             return lexeme::Ge;
 
         return lexeme::Gt;
     }
 
-    if(take('<')) {
-        if(take('='))
+    if (take('<')) {
+        if (take('='))
             return lexeme::Le;
             
-        if(take('>'))
+        if (take('>'))
             return lexeme::Ne;
 
         return lexeme::Lt;
     }
 
-    if(take(std::isalpha)) {
-        while(take(std::isalnum))
+    if (take(std::isalpha)) {
+        while (take(std::isalnum))
             ;
 
-        if(_buffer == "if")
+        if (_buffer == "if")
             return lexeme::If;
         
-        if(_buffer == "then")
+        if (_buffer == "then")
             return lexeme::Then;
         
-        if(_buffer == "else")
+        if (_buffer == "else")
             return lexeme::Else;
 
-        if(_buffer == "or")
+        if (_buffer == "or")
             return lexeme::Or;
 
-        if(_buffer == "and")
+        if (_buffer == "and")
             return lexeme::And;
 
         if (_buffer == "not")
             return lexeme::Not;
 
+        if (_buffer == "long")
+            return lexeme::Long;
+
+        if (_buffer == "double")
+            return lexeme::Double;
+
         return lexeme::Identifier;
     }
 
-    if(take(std::isdigit)) {
-        while(take(std::isdigit))
+    if (take(std::isdigit)) {
+        while (take(std::isdigit))
             ;
 
-        if(take('.')) {
-            while(take(std::isdigit))
+        if (take('.')) {
+            while (take(std::isdigit))
                 ;
 
-            return lexeme::Double;            
+            return lexeme::DoubleConstant;            
         }
 
-        return lexeme::Integer;
+        return lexeme::LongConstant;
     }
 
-    if(_input.peek() == std::char_traits<char>::eof())
+    if (_input.peek() == std::char_traits<char>::eof())
         return lexeme::Eof;
 
     throw new std::runtime_error("Unknown token '" + _buffer + "'.");
 }
 
 bool scanner::skip(char c) {
-    if(_input.peek() == c) {
+    if (_input.peek() == c) {
         _input.get();
 
         return true;
@@ -149,7 +159,7 @@ bool scanner::skip(char c) {
 }
 
 bool scanner::take(char c) {
-    if(_input.peek() == c) {
+    if (_input.peek() == c) {
         _buffer += _input.get();
 
         return true;
@@ -159,7 +169,7 @@ bool scanner::take(char c) {
 }
 
 bool scanner::take(int (*function)(int)) {
-    if(function(_input.peek())) {
+    if (function(_input.peek())) {
         _buffer += _input.get();
 
         return true;

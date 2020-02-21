@@ -2,8 +2,8 @@
 #define __PARSER_H__
 
 #include <istream>
-#include <set>
-#include <vector>
+#include <map>
+#include <string>
 
 #include "ast.h"
 #include "scanner.h"
@@ -20,7 +20,7 @@ public:
     const ast_program* parse_program();
 
 protected:
-	std::set<std::string> parse_parameters();
+	std::map<std::string, expression_type> parse_parameters();
 
 	const ast_expression* parse_expression();
 

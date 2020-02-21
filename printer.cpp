@@ -58,7 +58,9 @@ public:
 
 		for (auto i = function->parameters().cbegin(); i != function->parameters().cend(); i++) {
 			_printer.print("parameter ");
-			_printer.printline(*i);
+			_printer.print(i->first);
+			_printer.print(" ");
+			_printer.printline(to_string(i->second));
 		}
 
 		visitor::visit_function(function);
@@ -79,7 +81,7 @@ public:
 
 	virtual void visit_binary_operator(const ast_binary_operator* binary_operator) {
 		_printer.print("binary operator ");
-		_printer.printline(binary_operator->operation());
+		_printer.printline(to_string(binary_operator->operation()));
 
 		_printer.indent();
 
@@ -90,7 +92,7 @@ public:
 
 	virtual void visit_unary_operator(const ast_unary_operator* unary_operator) {
 		_printer.print("unary operator ");
-		_printer.printline(unary_operator->operation());
+		_printer.printline(to_string(unary_operator->operation()));
 
 		_printer.indent();
 

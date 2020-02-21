@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-enum lexeme
+enum class lexeme
 {
     NewLine,
     LParen,
@@ -18,20 +18,23 @@ enum lexeme
     Slash,
     Percent,
     Caret,
+    Colon,
     If,
     Then,
     Else,
     Or,
     And,
     Not,
+    Long,
+    Double,
     Lt,
     Gt,
     Le,
     Ge,
     Ne,
     Identifier,
-    Integer,
-    Double,
+    LongConstant,
+    DoubleConstant,
     Eof,
 };
 

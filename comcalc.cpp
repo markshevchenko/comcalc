@@ -19,7 +19,7 @@ void compile(const ast_program* program, const std::string& outfile);
 std::string replace_extension(const std::string& filename, const std::string& extension);
 
 int main(int argc, const char* const* argv) {
-    std::cout << "COMpiled CALCulator" << std::endl;
+    std::cout << "COMpiling CALCulator" << std::endl;
 
     if(argc < 2 || argc > 3) {
         std::cerr << "  Usage: comcalc in.cc [out.ll]    -- generate LLVM IR" << std::endl;

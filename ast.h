@@ -1,8 +1,8 @@
 #ifndef __AST_H__
 #define __AST_H__
 
+#include <map>
 #include <string>
-#include <set>
 #include <vector>
 
 #include "expression.h"
@@ -18,6 +18,9 @@ public:
 
 class ast_expression : public ast_node
 {
+public:
+
+    virtual expression_type type() const = 0;
 };
 
 class ast_logical_expression : public ast_node
@@ -119,15 +122,47 @@ public:
 	}
 };
 
+enum class binary_operation
+{
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Reminder,
+    Pow,
+};
+
+std::string to_string(binary_operation operation) {
+    if (operation == binary_operation::Add)
+        return "+";
+
+    if (operation == binary_operation::Subtract)
+        return "-";
+
+    if (operation == binary_operation::Multiply)
+        return "*"
+        ;
+    if (operation == binary_operation::Divide)
+        return "/";
+
+    if (operation == binary_operation::Reminder)
+        return "%";
+
+    if (operation == binary_operation::Pow)
+        return "^";
+
+    throw new std::runtime_error("Invalid binary operation.");
+}
+
 class ast_binary_operator : public ast_expression
 {
 private:
-    std::string _operation;
+    binary_operation _operation;
     const ast_expression* _left;
     const ast_expression* _right;
 
 public:
-    ast_binary_operator(const std::string& operation, const ast_expression* left, const ast_expression* right) {
+    ast_binary_operator(binary_operation operation, const ast_expression* left, const ast_expression* right) {
         _operation = operation;
         _left = left;
         _right = right;
@@ -142,7 +177,17 @@ public:
         visitor.visit_binary_operator(this);
     }
 
-    const std::string& operation() const {
+    virtual expression_type type() const {
+        if (operation() == binary_operation::Pow)
+            return expression_type::Double;
+
+        if (left()->type() == expression_type::Double || right()->type() == expression_type::Double)
+            return expression_type::Double;
+
+        return expression_type::Long;
+    }
+
+    const binary_operation operation() const {
         return _operation;
     }
 
@@ -155,14 +200,30 @@ public:
     }
 };
 
+enum class unary_operation
+{
+    Negative,
+    Positive,
+};
+
+std::string to_string(unary_operation operation) {
+    if (operation == unary_operation::Negative)
+        return "-";
+
+    if (operation == unary_operation::Positive)
+        return "+";
+
+    throw new std::runtime_error("Invalid unary operation.");
+}
+
 class ast_unary_operator : public ast_expression
 {
 private:
-    std::string _operation;
+    unary_operation _operation;
     const ast_expression* _operand;
 
 public:
-    ast_unary_operator(const std::string& operation, const ast_expression* operand) {
+    ast_unary_operator(unary_operation operation, const ast_expression* operand) {
         _operation = operation;
         _operand = operand;
     }
@@ -175,7 +236,11 @@ public:
         visitor.visit_unary_operator(this);
     }
 
-    const std::string& operation() const {
+    virtual expression_type type() const {
+        return operand()->type();
+    }
+
+    const unary_operation operation() const {
         return _operation;
     }
 
@@ -198,6 +263,10 @@ public:
         visitor.visit_long(this);
     }
 
+    virtual expression_type type() const {
+        return expression_type::Long;
+    }
+
     long value() const {
         return _value;
     }
@@ -215,6 +284,10 @@ public:
 
     virtual void accept(visitor& visitor) const {
         visitor.visit_double(this);
+    }
+
+    virtual expression_type type() const {
+        return expression_type::Double;
     }
 
     double value() const {
@@ -246,7 +319,7 @@ public:
         visitor.visit_variable(this);
     }
 
-    expression_type get_type() const {
+    virtual expression_type type() const {
         return _type;
     }
 
@@ -302,6 +375,16 @@ public:
 	virtual void accept(visitor& visitor) const {
 		visitor.visit_if_then_else(this);
 	}
+
+    virtual expression_type type() const {
+        if (then_expression()->type() == expression_type::Double)
+            return expression_type::Double;
+
+        if (else_expression()->type() == expression_type::Double)
+            return expression_type::Double;
+
+        return expression_type::Long;
+    }
 
 	const ast_logical_expression* logical_expression() const {
 		return _logical_expression;

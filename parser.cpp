@@ -1,11 +1,8 @@
 #include <set>
 #include <stdexcept>
-#include <string>
 #include <vector>
 
-#include "ast.h"
 #include "parser.h"
-#include "scanner.h"
 
 const ast_program* parser::parse_program() {
     std::vector<const ast_function*> functions;
@@ -17,7 +14,7 @@ const ast_program* parser::parse_program() {
 
 
 		if (skip(lexeme::LParen)) {
-			std::set<std::string> parameters = parse_parameters();
+			std::map<std::string, expression_type> parameters = parse_parameters();
 
 			expect(lexeme::RParen);
 			expect(lexeme::Eq);
@@ -44,23 +41,37 @@ const ast_program* parser::parse_program() {
     return new ast_program(functions, assignments);
 }
 
-template<typename T>
-bool is_contains(std::set<T> set, T element) {
-	return set.find(element) != set.end();
+static expression_type get_type_by_first_letter(char first_letter) {
+	if (std::strchr("ijklmnIJKLMN", first_letter) == NULL)
+		return expression_type::Double;
+
+	return expression_type::Long;
 }
 
-std::set<std::string> parser::parse_parameters() {
-    std::set<std::string> parameters;
+std::map<std::string, expression_type> parser::parse_parameters() {
+    std::map<std::string, expression_type> parameters;
 
     do {
-        std::string identifier;
+        std::string name;
 
-        expect(lexeme::Identifier, &identifier);
+        expect(lexeme::Identifier, &name);
 
-		if (is_contains(parameters, identifier))
-			throw new std::runtime_error("Dublicate parameter `" + identifier + "`.");
+		if (parameters.find(name) != parameters.end())
+			throw new std::runtime_error("Dublicate parameter `" + name + "`.");
 
-        parameters.insert(identifier);
+		expression_type type;
+		if (skip(lexeme::Colon)) {
+			if (skip(lexeme::Long))
+				type = expression_type::Long;
+			else if (skip(lexeme::Double))
+				type = expression_type::Double;
+			else
+				throw new std::runtime_error("Unknown type. Must be 'long' or 'double'.");
+		}
+		else
+			type = get_type_by_first_letter(name[0]);
+
+        parameters[name] = type;
     } while (skip(lexeme::Comma));
 
     return parameters;
@@ -73,11 +84,11 @@ const ast_expression* parser::parse_expression() {
 }
 
 const ast_expression* parser::parse_separated_operands1(const ast_expression* left) {
-    std::string operation;
+    binary_operation operation;
     if (skip(lexeme::Plus))
-        operation = '+';
+        operation = binary_operation::Add;
     else if (skip(lexeme::Minus))
-        operation = '-';
+        operation = binary_operation::Subtract;
     else
         return left;
 
@@ -94,13 +105,13 @@ const ast_expression* parser::parse_operand1() {
 }
 
 const ast_expression* parser::parse_separated_operands2(const ast_expression* left) {
-    std::string operation;
-    if (skip(lexeme::Star))
-        operation = '*';
+	binary_operation operation;
+	if (skip(lexeme::Star))
+        operation = binary_operation::Multiply;
     else if (skip(lexeme::Slash))
-        operation = '/';
+        operation = binary_operation::Divide;
     else if (skip(lexeme::Percent))
-        operation = '%';
+        operation = binary_operation::Reminder;
     else
         return left;
 
@@ -116,7 +127,7 @@ const ast_expression* parser::parse_operand2() {
     while (skip(lexeme::Caret)) {
         const ast_expression* right = parse_operand2();
 
-        left = new ast_binary_operator("^", left, right);
+        left = new ast_binary_operator(binary_operation::Pow, left, right);
     }
 
     return left;
@@ -124,10 +135,10 @@ const ast_expression* parser::parse_operand2() {
 
 const ast_expression* parser::parse_operand3() {
     if (skip(lexeme::Minus))
-        return new ast_unary_operator("-", parse_operand4());
+        return new ast_unary_operator(unary_operation::Negative, parse_operand4());
 
     if (skip(lexeme::Plus))
-        return new ast_unary_operator("+", parse_operand4());
+        return new ast_unary_operator(unary_operation::Positive, parse_operand4());
     
     return parse_operand4();
 }
@@ -136,25 +147,42 @@ const ast_expression* parser::parse_operand4() {
     std::string token;
     if (skip(lexeme::Identifier, &token)) {
         if (skip(lexeme::LParen)) {
-            std::vector<const ast_expression*> parameters;
-            parameters.push_back(parse_expression());
+			std::vector<const ast_expression*> parameters;
 
-            while (skip(lexeme::Comma))
-                parameters.push_back(parse_expression());
+			if (skip(lexeme::RParen))
+				return new ast_call(token, parameters);
+
+			do {
+				auto expression = parse_expression();
+				parameters.push_back(expression);
+			} while (skip(lexeme::Comma));
 
             expect(lexeme::RParen);
 
             return new ast_call(token, parameters);
         }
+		else if (skip(lexeme::Colon)) {
+			if (skip(lexeme::Long))
+				return new ast_variable(token, expression_type::Long);
 
-        return new ast_variable(token);
+			if (skip(lexeme::Double))
+				return new ast_variable(token, expression_type::Double);
+
+			throw new std::runtime_error("Unknown type. Must be 'long' or 'double'.");
+		}
+
+		bool is_long_variable_by_default = std::strchr("ijklmnIJKLMN", token[0]) != NULL;
+		if (is_long_variable_by_default)
+			return new ast_variable(token, expression_type::Long);
+
+		return new ast_variable(token, expression_type::Double);
     }
-    else if (skip(lexeme::Integer, &token)) {
+    else if (skip(lexeme::LongConstant, &token)) {
         int value = std::stoi(token);
 
         return new ast_long(value);
     }
-    else if (skip(lexeme::Double, &token)) {
+    else if (skip(lexeme::DoubleConstant, &token)) {
         double value = std::stod(token);
         
         return new ast_double(value);

@@ -26,40 +26,40 @@ void step1_tables_builder::visit_function(const ast_function* function) {
 }
 
 void step1_tables_builder::visit_assignment(const ast_assignment* assignment) {
-	_parameters.clear();
-	auto declared_identifier = assignment->name();
-
-	bool is_identifier_already_declared = _output_variables.find(declared_identifier) != _output_variables.end();
-	if (is_identifier_already_declared)
-		throw new std::runtime_error("Variable `" + declared_identifier + "` already declared.");
-
-	_output_variables.insert(declared_identifier);
-
 	visitor::visit_assignment(assignment);
+	auto name = assignment->name();
+
+	bool is_identifier_already_declared = _output_variables.find(name) != _output_variables.end();
+	if (is_identifier_already_declared)
+		throw new std::runtime_error("Variable `" + name + "` already declared.");
+
+	auto type = assignment->expression()->type();
+
+	_output_variables[name] = type;
 
 	_assignments.push_back(assignment);
 }
 
 void step1_tables_builder::visit_variable(const ast_variable* variable) {
-	_input_variables.insert(variable->name());
+	_input_variables[variable->name()] = variable->type();;
 
 	visitor::visit_variable(variable);
 }
 
 static std::map<std::string, function_signature> standard_functions =
 {
-	{ "acos", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "asin", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "atan", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "atan2", function_signature(expression_type::DOUBLE, expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "cos", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "exp", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "fabs", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "log", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "log10", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "sin", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "sqrt", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
-	{ "tan", function_signature(expression_type::DOUBLE, expression_type::DOUBLE) },
+	{ "acos", function_signature(expression_type::Double, expression_type::Double) },
+	{ "asin", function_signature(expression_type::Double, expression_type::Double) },
+	{ "atan", function_signature(expression_type::Double, expression_type::Double) },
+	{ "atan2", function_signature(expression_type::Double, expression_type::Double, expression_type::Double) },
+	{ "cos", function_signature(expression_type::Double, expression_type::Double) },
+	{ "exp", function_signature(expression_type::Double, expression_type::Double) },
+	{ "fabs", function_signature(expression_type::Double, expression_type::Double) },
+	{ "log", function_signature(expression_type::Double, expression_type::Double) },
+	{ "log10", function_signature(expression_type::Double, expression_type::Double) },
+	{ "sin", function_signature(expression_type::Double, expression_type::Double) },
+	{ "sqrt", function_signature(expression_type::Double, expression_type::Double) },
+	{ "tan", function_signature(expression_type::Double, expression_type::Double) },
 };
 
 void step1_tables_builder::visit_call(const ast_call* call) {

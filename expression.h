@@ -5,9 +5,19 @@
 
 enum class expression_type
 {
-	LONG = 1,
-	DOUBLE,
+	Long = 1,
+	Double,
 };
+
+std::string to_string(expression_type type) {
+	if (type == expression_type::Long)
+		return "long";
+
+	if (type == expression_type::Double)
+		return "double";
+
+	throw new std::runtime_error("Unknown type.");
+}
 
 struct expression_node
 {
@@ -21,10 +31,13 @@ public:
 	expression_type type() const { return _type; }
 
 	std::string register_name() const { return _register_name; }
+
+	std::string to_string() const {
+		if (type() == expression_type::Double)
+			return "double " + register_name();
+
+		return "i64 " + register_name();
+	}
 };
-
-std::string get_node_as_text(expression_node node);
-
-expression_type get_variable_type(const std::string& variable_name);
 
 #endif

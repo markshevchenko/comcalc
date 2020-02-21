@@ -19,9 +19,10 @@ public:
 	void print_code();
 
 private:
-	std::set<std::string> _input_only_variables;
-	std::set<std::string> _output_only_variables;
-	std::set<std::string> _all_variables;
+	std::map<std::string, expression_type> _input_only_static_variables;
+	std::map<std::string, expression_type> _output_only_static_variables;
+	std::map<std::string, expression_type> _all_static_variables;
+	std::map<std::string, expression_type> _all_local_variables;
 	std::set<std::string> _standard_functions;
 	std::vector<const ast_function*> _functions;
 	std::vector<const ast_assignment*> _assignments;
